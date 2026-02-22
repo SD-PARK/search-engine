@@ -1,0 +1,21 @@
+[mysqld]
+character-set-server  = utf8mb4
+collation-server      = utf8mb4_unicode_ci
+
+# ── 한글 ngram 전문검색 설정 ───
+# ngram 파서: 한글을 2글자씩 잘라 인덱싱 (e.g. "스프링" → "스프", "프링")
+innodb_ft_min_token_size = 2   # InnoDB FULLTEXT 최소 토큰 길이
+ft_min_word_len          = 2   # MyISAM용 최소 단어 길이
+
+innodb_buffer_pool_size  = 256M  # 메모리 여유에 따라 조정 (RAM의 50~70% 권장)
+max_connections          = 100
+
+slow_query_log           = 1
+slow_query_log_file      = /var/log/mysql/slow.log
+long_query_time          = 1    # 1초 이상 걸리는 쿼리 기록
+
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4

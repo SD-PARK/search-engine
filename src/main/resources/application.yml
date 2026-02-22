@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: search-engine
+  datasource:
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:search_engine}?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ${DB_USER:search_user}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    #      ddl-auto: validate  # Flyway Migration ?? ?? ? ???
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace

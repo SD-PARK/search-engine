@@ -1,0 +1,56 @@
+services:
+
+  # ── MariaDB ─────────────────────────────────────────────────────────────
+  mariadb:
+    build:
+      context: .
+      dockerfile: docker/mariadb/Dockerfile
+    container_name: search-engine-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE:      ${DB_NAME}
+      MARIADB_USER:          ${DB_USER}
+      MARIADB_PASSWORD:      ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./logs/mariadb:/var/log/mysql
+    networks:
+      - search-net
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── SpringBoot 앱 (Tomcat + WAR) ────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: search-engine-app
+    restart: unless-stopped
+    environment:
+      DB_HOST:     mariadb
+      DB_PORT:     3306
+      DB_NAME:     ${DB_NAME}
+      DB_USER:     ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      TZ:          Asia/Seoul
+    ports:
+      - "9001:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy   # DB 헬스체크 통과 후 앱 시작
+    networks:
+      - search-net
+
+networks:
+  search-net:
+    driver: bridge
+
+volumes:
+  mariadb-data:
